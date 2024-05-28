@@ -1,0 +1,279 @@
+.color-prompter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.color-prompter-card {
+    background-color: white;
+    width: 300px;
+    /* height: 400px; */
+    padding: 40px 20px;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-block {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 30px;
+}
+
+.color-identifier {
+    font-family: "Roboto", sans-serif;
+    font-weight: 800;
+    font-size: 40px;
+    margin-bottom: 30px;
+}
+
+.game-background {
+    background: linear-gradient(235deg, #ebff82, #3fec5c, #3c62fd, #fd4f3c, #fd3ce5, #af3cfd, #fda43c, #3cfbfd);
+    background-size: 1600% 1600%;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1; 
+
+    -webkit-animation: AnimationName 30s ease infinite;
+    -moz-animation: AnimationName 30s ease infinite;
+    animation: AnimationName 30s ease infinite;
+}
+
+.elements-container {
+    margin-top: 15vh;
+    z-index: 1;
+}
+
+.control-container {
+    background: white;
+    font-family: "Roboto", sans-serif;
+    width: 90vw;
+    height: 50px;
+    margin: auto;
+    margin-bottom: 5px;
+    display: flex;
+}
+
+.timer-round {
+    font-weight: 400;
+    font-size: 18px;
+    flex: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hint {
+    font-weight: 600;
+    font-size: 28px;
+    flex: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings {
+    flex: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-button {
+    background-color: rgb(126, 255, 152);
+    color: black;
+    text-align: center;
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 14px;
+    border-radius: 5px;
+    padding: 8px 10px;
+    margin: auto;
+}
+
+.confirm-button:hover {
+    cursor: pointer;
+}
+
+.gamepieces-container {
+    display: flex;
+    width: 90vw;
+    margin: auto;
+}
+
+.player-list {
+    flex: 2.5;
+    margin-right: 5px;
+}
+
+.player-box {
+    background: white;
+    height: 60px;
+    display: flex;
+    font-family: "Roboto", sans-serif;
+    box-sizing: border-box;
+    padding: 0 5px;
+}
+
+.active-guesser {
+    background: rgb(255, 249, 160);
+}
+
+.active-player {
+    background: rgb(180, 230, 252);
+}
+
+.player-placing {
+    font-size: 15px;
+    font-weight: 500;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-info {
+    font-weight: 500;
+    flex: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-name {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.player-points {
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.player-icon {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 3px;
+}
+
+.icon-image {
+    width: 40px;
+    height: 40px;
+}
+
+.game-piece-image {
+    width: 17px;
+    height: 17px;
+}
+
+.alternate {
+    background: #ececec;
+}
+
+.game-board {
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 5px;
+}
+  
+.row {
+    display: flex;
+}
+  
+.square {
+    /* width: 25px;
+    height: 25px; */
+    width: 1.65vw;
+    height: 1.65vw;
+    margin: 1px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.square:hover {
+    cursor: pointer;
+    box-shadow: inset 0px 0px 0px 3px #fff;
+}
+
+.label {
+    font-size: 12px;
+}
+
+.label:hover {
+    cursor: default;
+    box-shadow: none;
+}
+  
+.empty {
+    width: 1.65vw;
+    height: 1.65vw;
+    margin: 1px;
+}
+
+.empty:hover {
+    cursor: default;
+    box-shadow: none;
+}
+
+.chat-container {
+    background: white;
+    height: 60vh;
+    flex: 3;
+}
+
+.chat-stream {
+    height: 90%;
+    font-family: "Roboto", sans-serif;
+    font-style: normal;
+    overflow-y: scroll;
+}
+
+.chat-message {
+    box-sizing: border-box;
+    padding: 5px 10px;
+    font-size: 12px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.chat-input-container {
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chat-input:focus {
+    outline: none;
+}
+
+.chat-input {
+    width: 95%;
+    margin: auto;
+    box-sizing: border-box;
+    padding: 5px 5px;
+}

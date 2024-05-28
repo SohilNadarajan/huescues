@@ -1,0 +1,92 @@
+.background {
+    background: linear-gradient(235deg, #ebff82, #3fec5c, #3c62fd, #fd4f3c, #fd3ce5, #af3cfd, #fda43c, #3cfbfd);
+    background-size: 1600% 1600%;
+    width: 100vw;
+    height: 100vh;
+
+    -webkit-animation: AnimationName 30s ease infinite;
+    -moz-animation: AnimationName 30s ease infinite;
+    animation: AnimationName 30s ease infinite;
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 13%}
+    50%{background-position:100% 88%}
+    100%{background-position:0% 13%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 13%}
+    50%{background-position:100% 88%}
+    100%{background-position:0% 13%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 13%}
+    50%{background-position:100% 88%}
+    100%{background-position:0% 13%}
+}
+
+.title-container {
+    text-align: center;
+    padding-top: 20vh;
+    padding-bottom: 30px;
+}
+
+.title {
+    color: white;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    letter-spacing: 2px;
+}
+
+.bigtext {
+    line-height: 160px;
+    font-size: 160px;
+}
+
+.smalltext {
+    line-height: 60px;
+    font-size: 120px;
+}
+
+.action-container {
+    margin-top: 20px;
+}
+
+.name-input:focus {
+    outline: none;
+}
+
+.name-input {
+    border: 2px solid black;
+    border-radius: 2px;
+    font-family: "Roboto", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 15px;
+    box-sizing: border-box;
+    padding: 10px;
+    display: block;
+    margin: auto;
+    height: 35px;
+    width: 300px
+}
+
+.button {
+    width: 300px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 30px;
+    border-radius: 5px;
+    padding: 10px 0;
+    margin: auto;
+    margin-top: 15px;
+}
+
+.button:hover {
+    cursor: pointer;
+}
