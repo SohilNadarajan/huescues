@@ -30,6 +30,7 @@ export const Game = () => {
 	const [randomLabel, setRandomLabel] = useState('');
 	const [randomCoord, setRandomCoord] = useState([]);
 	const [hint, setHint] = useState('');
+	const [hintPlaceholder, setHintPlaceholder] = useState('Provide a description...');
 	const [firstSelectedSquare, setFirstSelectedSquare] = useState(null);
 	const [secondSelectedSquare, setSecondSelectedSquare] = useState(null);
 
@@ -67,23 +68,48 @@ export const Game = () => {
 
 	// user joined
 	useEffect(() => {
-		socket.on("user_update", (data) => setUsers(data));
+		socket.on('user_update', (data) => {
+			setUsers(data);
+		});
+	  
+		// Cleanup function to remove the listener when the component unmounts
+		return () => {
+			socket.off('user_update');
+		};
+	}, []);
 
+	useEffect(() => {
 		socket.on('game_started', (initialState) => {
             setGameState(initialState);
         });
 
 		socket.on('game_state_update', (updatedState) => {
             setGameState(updatedState);
+			// console.log(users);
+			// console.log(users.findIndex(user => user.name === name));
+			// console.log(updatedState.playerTurnIndex);
+			if (updatedState.guessCycle === 2 
+				&& users.findIndex(user => user.name === name) == updatedState.playerTurnIndex
+				&& users.findIndex(user => user.name === name) == updatedState.guesserTurnIndex) {
+				secondHint();
+			}
+			if (updatedState.guessCycle === 1
+				&& users.findIndex(user => user.name === name) == updatedState.playerTurnIndex
+				&& users.findIndex(user => user.name === name) == updatedState.guesserTurnIndex) {
+				promptColorCard();
+				socket.emit("start_player_turn", { name, room });
+			}
+			if (updatedState.selections.length === 0) {
+				setFirstSelectedSquare(null);
+				setSecondSelectedSquare(null);
+			}
         });
-	  
-		// Cleanup function to remove the listener when the component unmounts
+
 		return () => {
-			socket.off('user_update');
 			socket.off('game_started');
 			socket.off('game_state_update');
 		};
-	}, []);
+    }, [users]);
 
 	// resize chat container to match game board
 	useEffect(() => {
@@ -120,6 +146,11 @@ export const Game = () => {
 		promptColorCard();
 	}
 
+	const secondHint = () => {
+		setPromptColor(true);
+		socket.emit("player_second_hint", { name, room });
+	}
+
 	const generateLabel = (col, row) => {
 		const rowLabel = String.fromCharCode(65 + row - 1); // Convert to A-Z
 		return `${rowLabel}${col}`;
@@ -152,14 +183,23 @@ export const Game = () => {
 			};
 			socket.emit('send_hint', moveData);
 			setPromptColor(false);
-			// moveData -- randomcolor, randomlabel, randomcoord, hint
+			if (gameState.guessCycle === 1) {
+				setHintPlaceholder('Refine your description...');
+			} else if (gameState.guessCycle === 2) {
+				setHintPlaceholder('Provide a description...');
+			}
 			setHint('');
 		}
 	};
 
 	const promptColorCard = () => {
-		const randomIndex = Math.floor(Math.random() * colors.length);
-		const { col, row, label } = getCoordinateAndLabel(randomIndex);
+		let randomIndex = Math.floor(Math.random() * colors.length);
+		let { col, row, label } = getCoordinateAndLabel(randomIndex);
+
+		while (col < 3 || row < 3 || col > 28 || row > 14) {
+			randomIndex = Math.floor(Math.random() * colors.length);
+			({ col, row, label } = getCoordinateAndLabel(randomIndex));
+		}
 
 		// select random color
 		setPromptColor(true);
@@ -278,7 +318,7 @@ export const Game = () => {
 	const handleSquareClick = (coord) => {
 		// TODO: don't use 'name' to identify, use 'id'
 		const user = users.find(user => user.name === name);
-		if (gameState.guesserTurnIndex === users.findIndex(user => user.name === name)) {
+		if (gameState?.guesserTurnIndex === users.findIndex(user => user.name === name)) {
 			if (gameState.guessCycle === 1) {
 				setFirstSelectedSquare(coord);
 			}
@@ -302,7 +342,7 @@ export const Game = () => {
 					<div className='color-identifier'>{randomLabel}</div>
 					<input 
 						className='chat-input' 
-						placeholder='Provide a description...' 
+						placeholder={hintPlaceholder} 
 						maxLength={100}
 						value={hint}
 						onChange={(event) => {setHint(event.target.value);}}

@@ -52,6 +52,48 @@ const startGame = (room) => {
     io.in(room).emit('game_started', gameState);
 }
 
+function calculateScore(gameState, users) {
+    const { randomCoord, selections } = gameState;
+    const [randomX, randomY] = randomCoord;
+    
+    let playerPoints = 0;
+    const updatedUsers = users.map(user => {
+        const userSelections = selections.filter(sel => sel.name === user.name);
+        
+        let totalPoints = 0;
+        userSelections.forEach(selection => {
+            const [col, row] = selection.coords.split('-').map(Number);
+            const distance = Math.max(Math.abs(randomX - row), Math.abs(randomY - col)); // Chebyshev distance
+            if (distance === 0) {
+                totalPoints += 30;
+                playerPoints += 10;
+            } else if (distance === 1) {
+                totalPoints += 20;
+                playerPoints += 10;
+            } else if (distance === 2) {
+                totalPoints += 10;
+                playerPoints += 10;
+            }
+        });
+        
+        return { ...user, points: user.points + totalPoints };
+    });
+
+    if (gameState.playerTurnIndex >= 0 && gameState.playerTurnIndex < updatedUsers.length) {
+        updatedUsers[gameState.playerTurnIndex].points += playerPoints;
+    }
+
+    // Sort users by points in descending order to update their placing
+    const sortedUsers = [...updatedUsers].sort((a, b) => b.points - a.points);
+
+    // Update placing based on sorted order
+    sortedUsers.forEach((user, index) => {
+        user.placing = index + 1;
+    });
+    
+    return updatedUsers;
+}
+
 io.on("connection", (socket) => {
     console.log(`user connected: ${socket.id}`);
     allClients.push(socket);
@@ -87,8 +129,15 @@ io.on("connection", (socket) => {
         io.to(data.room).emit("receive_message", { name: data.name, message: `${data.name} is thinking...`, type: 'notif' });
     });
 
+    socket.on("player_second_hint", (data) => {
+        io.to(data.room).emit("receive_message", { name: data.name, message: `${data.name} is refining their hint...`, type: 'notif' });
+    });
+
     socket.on("send_hint", (moveData) => {
-        const newGuesserTurnIndex = (gameState.guesserTurnIndex + 1) % users.length;
+        let newGuesserTurnIndex = (gameState.guesserTurnIndex + 1) % users.length;
+        if (gameState.guessCycle === 2) {
+            newGuesserTurnIndex = ((gameState.guesserTurnIndex - 1) + users.length) % users.length;
+        }
         gameState = {
             ...gameState,
             ...moveData,
@@ -99,10 +148,48 @@ io.on("connection", (socket) => {
     });
 
     socket.on("send_guess", (guessData) => {
-        const newGuesserTurnIndex = (gameState.guesserTurnIndex + 1) % users.length;
+        let newGuesserTurnIndex = 0;
+        if (gameState.guessCycle === 1) {
+            newGuesserTurnIndex = (gameState.guesserTurnIndex + 1) % users.length;
+            if (newGuesserTurnIndex === gameState.playerTurnIndex) {
+                gameState = {
+                    ...gameState,
+                    selections: [...gameState.selections, guessData],
+                    guesserTurnIndex: newGuesserTurnIndex,
+                    guessCycle: 2
+                };
+                io.in(gameState.room).emit('game_state_update', gameState);
+                return;
+            }
+        }
+        if (gameState.guessCycle === 2) {
+            newGuesserTurnIndex = ((gameState.guesserTurnIndex - 1) + users.length) % users.length;
+            if (newGuesserTurnIndex === gameState.playerTurnIndex) {
+                newGuesserTurnIndex = (newGuesserTurnIndex + 1) % users.length;
+                const newPlayerTurnIndex = newGuesserTurnIndex;
+                // calculate points and update users
+                users = calculateScore(gameState, users);
+                gameState = {
+                    ...gameState,
+                    selections: [],
+                    playerTurnIndex: newPlayerTurnIndex,
+                    guesserTurnIndex: newGuesserTurnIndex,
+                    guessCycle: 1
+                };
+                if (newPlayerTurnIndex === 0) {
+                    gameState = {
+                        ...gameState,
+                        round: 2
+                    }
+                }
+                io.in(gameState.room).emit('game_state_update', gameState);
+                io.in(gameState.room).emit('user_update', users);
+                return;
+            }
+        }
         gameState = {
             ...gameState,
-            selections: [...gameState.selections, guessData],
+            selections: [...(gameState.selections || []), guessData],
             guesserTurnIndex: newGuesserTurnIndex
         };
         io.in(gameState.room).emit('game_state_update', gameState);
