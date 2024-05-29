@@ -52,6 +52,14 @@ const startGame = (room) => {
     io.in(room).emit('game_started', gameState);
 }
 
+const endGame = (room) => {
+    const topUser = users.reduce((max, user) => user.points > max.points ? user : max, users[0]);
+    io.to(room).emit('receive_message', { name: topUser.name, message: `${topUser.name} won with ${topUser.points} points!`, type: 'winner' });
+    users = users.map(user => ({ ...user, points: 0 }));
+    socket.in(room).emit("user_update", users);
+    io.in(room).emit('end_game');
+}
+
 function calculateScore(gameState, users) {
     const { randomCoord, selections } = gameState;
     const [randomX, randomY] = randomCoord;
@@ -103,22 +111,39 @@ io.on("connection", (socket) => {
 
         var i = allClients.indexOf(socket);
         allClients.splice(i, 1);
+        const userToRemove = users.find(user => user.socketId === socket.id);
+        if (userToRemove) {
+            io.in(userToRemove.room).emit("receive_message", { name: userToRemove.name, message: `${userToRemove.name} left the room`, type: 'disconnect'});
+        }
         users = users.filter(user => user.socketId !== socket.id);
         socket.in(69).emit("user_update", users);
-        // io.in(69).emit("receive_message", { message: `${disconnectingUser.name} left the room`, type: 'disconnect'});
+        // let disconnectingUser = users.find(user => user.socketId == socket.id);
+        // io.in(69).emit("receive_message", { name: disconnectingUser.name, message: `${disconnectingUser.name} left the room`, type: 'disconnect'});
+    });
+
+    socket.on('leave_page', () => {
+        console.log('left');
+        var i = allClients.indexOf(socket);
+        allClients.splice(i, 1);
+        const userToRemove = users.find(user => user.socketId === socket.id);
+        if (userToRemove) {
+            io.in(userToRemove.room).emit("receive_message", { name: userToRemove.name, message: `${userToRemove.name} left the room`, type: 'disconnect'});
+        }
+        users = users.filter(user => user.socketId !== socket.id);
+        socket.in(69).emit("user_update", users);
     });
 
     socket.on("join_room", (data) => {
         socket.join(data.room);
         handleNewUser(data, socket.id);
-        console.log(users);
+        // console.log(users);
         io.in(data.room).emit("user_update", users);
         io.in(data.room).emit("receive_message", { message: `${data.name} joined the room!`, type: 'connect'});
     });
 
     socket.on("send_message", (data) => {
         io.to(data.room).emit("receive_message", data);
-        console.log(data);
+        // console.log(data);
     });
 
     socket.on("start_game", (data) => {
@@ -168,7 +193,14 @@ io.on("connection", (socket) => {
                 newGuesserTurnIndex = (newGuesserTurnIndex + 1) % users.length;
                 const newPlayerTurnIndex = newGuesserTurnIndex;
                 // calculate points and update users
+                gameState = {
+                    ...gameState,
+                    selections: [...gameState.selections, guessData]
+                };
+                io.in(gameState.room).emit('game_state_update', gameState);
                 users = calculateScore(gameState, users);
+                io.in(gameState.room).emit('user_update', users);
+                io.in(gameState.room).emit('display_turn_results');
                 gameState = {
                     ...gameState,
                     selections: [],
@@ -177,13 +209,17 @@ io.on("connection", (socket) => {
                     guessCycle: 1
                 };
                 if (newPlayerTurnIndex === 0) {
+                    let nextRound = gameState.round + 1;
+                    if (nextRound == 4) {
+                        endGame(gameState.room);
+                        return;
+                    }
                     gameState = {
                         ...gameState,
-                        round: 2
+                        round: nextRound
                     }
                 }
-                io.in(gameState.room).emit('game_state_update', gameState);
-                io.in(gameState.room).emit('user_update', users);
+                setTimeout(() => io.in(gameState.room).emit('game_state_update', gameState), 5000);
                 return;
             }
         }
