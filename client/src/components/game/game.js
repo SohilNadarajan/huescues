@@ -2,7 +2,8 @@ import './game.css';
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
-const socket = io.connect("http://localhost:3001");
+// const socket = io.connect("http://localhost:3001");
+const socket = io.connect("https://hues-and-cues-be1fbd9a0756.herokuapp.com/");
 
 export const Game = () => {
 	const { state } = useLocation();
