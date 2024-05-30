@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const http = require('http');
 const { Server } = require('socket.io');
@@ -15,6 +16,14 @@ const io = new Server(server, {
         origin: "https://hues-and-cues-be1fbd9a0756.herokuapp.com/",
         methods: ["GET", "POST"],
     }
+});
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 const animals = ["bear", "cat", "chicken", "deer", "dog", "giraffe", "koala", "lion", "panda", "polar-bear", "puffer-fish", "rabbit", "rhino", "sloth", "snake", "weasel"];
